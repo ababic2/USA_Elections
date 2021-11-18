@@ -10,8 +10,12 @@ namespace USAElections.Models
     {
         [Key]
         public int Id { get; set; }
+
+        [Required]
         public String Username { get; set; }
-        public int Votes { get; set; }
         public String FullName { get; set; }
+
+        public ICollection<Constituency> Constituency { get; set; }
+        public ICollection<Vote> Vote { get; set; }
     }
 }
