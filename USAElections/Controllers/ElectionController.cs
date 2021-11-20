@@ -1,53 +1,105 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using USAElections.DAO;
 using USAElections.Data;
+using USAElections.Models;
+using USAElections.Services;
 
 namespace USAElections.Controllers
 {
     public class ElectionController : Controller
     {
-        private readonly ApplicationDbContext _db;
+        public CandidateService _candidateService;
+        public ConstituencyService _constituencyService;
+        public VoteService _voteService;
+        public CandidateConstituencyService _candidateConstituencyService;
+        private readonly INotyfService _notyf;
+  
 
-        public ElectionController(ApplicationDbContext db)
+        public ElectionController(CandidateService cs, ConstituencyService cos, VoteService vs, CandidateConstituencyService ccs, INotyfService notyf)
         {
-            _db = db;
+            _candidateService = cs;
+            _constituencyService = cos;
+            _voteService = vs;
+            _candidateConstituencyService = ccs;
+            _notyf = notyf;
         }
+
         public IActionResult Index()
         {
-            //var query = (from article in Articles
-            //             from category in article.Categories.Where(x => x.Category_ID == category_id)
-            //             select article);
-            //var episodes = (from constituency in _db.Constituency
-            //                from candidate in _db.Candidate.Where(x => x.Id == constituency.Id
-            //                select constituency.Name)
-            //          .AsNoTracking()
-            //          .ToList();
-            SqlDataReader rdr = null;
-            SqlConnection con = null;
-            SqlCommand cmd = null;
-            String FirstName = null;
-            String LastName;
-            string ConnectionString = "Server=(LocalDB)\\MSSQLLocalDB;Database=Elections;Trusted_Connection=True;MultipleActiveResultSets=true";
-            con = new SqlConnection(ConnectionString);
-            con.Open();
-            string CommandText = "SELECT c.Name, v.number, k.Username  FROM Constituency c, Candidate k, CandidateConstituency j, Vote v WHERE c.Id = v.ConstituencyId and k.Id = v.CandidateId and c.Id = j.ConstituencyId and k.Id = j.CandidateId; ";
-            cmd = new SqlCommand(CommandText);
-            cmd.Connection = con;
-            rdr = cmd.ExecuteReader();
-            // Fill the string with the values retrieved
-            // Kreiraj objekat ovog tipa, napravi listu i posalji je tamo u view
-            while (rdr.Read())
-            {
-                FirstName = rdr["Name"].ToString(); 
-                LastName = rdr["Username"].ToString();
-            }
-            Console.WriteLine(FirstName);
+            Queries query = new Queries();
+            List<ResultHelper> results = query.GetAllResults();
+            ViewModel vm = new ViewModel(query.GetAllCities(), results);
 
-            return View();
+            return View(vm);
+        }
+
+        [HttpPost]
+        public IActionResult Index(IFormFile file, [FromServices] IHostingEnvironment hosting)
+        {
+            #region Upload CSV
+            if (file == null)
+            {
+                _notyf.Warning("Please choose file");
+            }
+            else
+            {
+                string fileName = $"{hosting.WebRootPath}\\files\\{file.FileName}";
+                using (FileStream fileStream = System.IO.File.Create(fileName))
+                {
+                    file.CopyTo(fileStream);
+                    fileStream.Flush();
+                }
+                #endregion
+                #region Read CSV
+                var path = $"{Directory.GetCurrentDirectory()}{@"\wwwroot\files"}" + "\\" + file.FileName;
+                string[] lines = System.IO.File.ReadAllLines(path);
+                foreach (string line in lines)
+                {
+                    var values = line.Split(',');
+
+                    // CHECK IF RECORD IS ALREADY IN BASE AND UPDATE
+                    // ELSE ADD TO BASE
+
+                    // kako se grad ne bi pokazivao 100x na formi
+                    // ispitaj da li se taj grad nalazi i vrati id ako ga pronadjes u bazi
+                    // preskoci ponovno dodavanje
+
+                    Constituency constituency = new Constituency(values[0]);
+
+                    int conId = _constituencyService.AddConstituency(constituency);
+                    constituency.ConstituencyId = conId;
+
+                    for (int i = 1; i < values.Length; i += 2)
+                    {
+                        Candidate can = new Candidate(values[i + 1]);
+                        int canId = _candidateService.AddCandidate(can, constituency.ConstituencyId);
+                        can.CandidateId = canId;
+
+                        CandidateConstituency cc = new CandidateConstituency(can, constituency);
+                        _candidateConstituencyService.AddCandidateConstituency(cc);
+
+                        Vote vote = new Vote(Int32.Parse(values[i]), can, constituency);
+                        _voteService.AddVote(vote);
+                    }
+                }
+            }
+            #endregion
+            return Index();
+        }
+
+        public IActionResult CheckButtonClicked(string button)
+        {
+            return View();  
         }
     }
 }
