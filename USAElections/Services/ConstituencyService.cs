@@ -21,5 +21,18 @@ namespace USAElections.Services
             _context.SaveChanges();
             return constituency.ConstituencyId;
         }
+
+        public int ChechIfCityIsInDatabase(string name)
+        {
+            var result = from c in _context.Constituency
+                         where c.Name == name
+                         select c.ConstituencyId;
+          
+            if(result.Any())
+            {
+                return result.First();
+            }
+            return -1;
+        }
     }
 }

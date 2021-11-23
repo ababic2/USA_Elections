@@ -73,23 +73,53 @@ namespace USAElections.Controllers
                     // kako se grad ne bi pokazivao 100x na formi
                     // ispitaj da li se taj grad nalazi i vrati id ako ga pronadjes u bazi
                     // preskoci ponovno dodavanje
-
+                    
+                    bool candidateInBase = false;
+                    bool constituencyInBase = false;
+                    
                     Constituency constituency = new Constituency(values[0]);
+                    int conId;
+                    conId = _constituencyService.ChechIfCityIsInDatabase(values[0]);
+                    if (conId == -1)
+                    {
+                        // ako nije u bazi, dodaj ga
+                        conId = _constituencyService.AddConstituency(constituency);
 
-                    int conId = _constituencyService.AddConstituency(constituency);
+                    } else
+                    {
+                        constituencyInBase = true;
+                    }
                     constituency.ConstituencyId = conId;
 
+                    
                     for (int i = 1; i < values.Length; i += 2)
                     {
                         Candidate can = new Candidate(values[i + 1]);
-                        int canId = _candidateService.AddCandidate(can, constituency.ConstituencyId);
+                        int canId;
+                        canId = _candidateService.ChechIfCandidateIsInDatabase(values[i + 1]);
+                        if(canId == -1)
+                        {
+                            canId = _candidateService.AddCandidate(can, constituency.ConstituencyId);
+                            candidateInBase = false;
+                        } else
+                        {
+                            candidateInBase = true;
+                        }
                         can.CandidateId = canId;
 
-                        CandidateConstituency cc = new CandidateConstituency(can, constituency);
-                        _candidateConstituencyService.AddCandidateConstituency(cc);
+                        if(candidateInBase && constituencyInBase)
+                        {
+                            _voteService.UpdateVote(Int32.Parse(values[i]), canId, conId);
+                           
+                        } else
+                        {
+                            CandidateConstituency cc = new CandidateConstituency(can, constituency);
+                            _candidateConstituencyService.AddCandidateConstituency(cc);
 
-                        Vote vote = new Vote(Int32.Parse(values[i]), can, constituency);
-                        _voteService.AddVote(vote);
+                            Vote vote = new Vote(Int32.Parse(values[i]), can, constituency);
+                            _voteService.AddVote(vote);
+                        }
+
                     }
                 }
             }

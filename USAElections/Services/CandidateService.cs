@@ -24,17 +24,18 @@ namespace USAElections.Services
             return candidate.CandidateId;
           
         }
+        public int ChechIfCandidateIsInDatabase(string username)
+        {
+            var result = from c in _context.Candidate
+                         where c.Username == username
+                         select c.CandidateId;
+            if (result.Any())
+            {
+                return result.First();
+            }
+            return -1;
 
-        //public AuthorWithBooksVM GetAuthorWithBooks(int authorId)
-        //{
-        //    var _author = _context.Authors.Where(n => n.Id == authorId).Select(n => new AuthorWithBooksVM()
-        //    {
-        //        FullName = n.FullName,
-        //        BookTitles = n.Book_Authors.Select(n => n.Book.Title).ToList()
-        //    }).FirstOrDefault();
-
-        //    return _author;
-        //}
+        }
 
     }
 }

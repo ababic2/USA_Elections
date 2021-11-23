@@ -14,6 +14,10 @@ namespace USAElections.Data
 
         }
 
+        public ApplicationDbContext()
+        {
+        }
+
         public DbSet<Candidate> Candidate { get; set; }
         public DbSet<Constituency> Constituency { get; set; }
         public DbSet<CandidateConstituency> CandidateConstituency { get; set; }
