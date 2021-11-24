@@ -18,19 +18,18 @@ namespace USAElections.DAO
             this.con = new SqlConnection("Server=(LocalDB)\\MSSQLLocalDB;Database=Elections;Trusted_Connection=True;MultipleActiveResultSets=true");
             this.cmd = null;
         }
-        public List<ResultHelper> GetAllResults()
+        public List<Tuple<string, string, string, string>> GetAllResults()
         {
             con.Open();
             string CommandText = "SELECT c.Name, v.number, k.Username  FROM Constituency c, Candidate k, CandidateConstituency j, Vote v WHERE c.ConstituencyId = v.ConstituencyId and k.CandidateId = v.CandidateId and c.ConstituencyId = j.ConstituencyId and k.CandidateId = j.CandidateId; ";
             cmd = new SqlCommand(CommandText);
             cmd.Connection = con;
             rdr = cmd.ExecuteReader();
-   
-            List<ResultHelper> results = new List<ResultHelper>();
+
+            List<Tuple<string, string, string, string>> results = new List<Tuple<string, string, string, string>>();
             while (rdr.Read())
             {
-                ResultHelper result = new ResultHelper(rdr["Name"].ToString(), rdr["number"].ToString(), rdr["Username"].ToString());
-                results.Add(result);
+                results.Add(new Tuple<string, string, string, string>(rdr["Name"].ToString(), rdr["number"].ToString(), rdr["Username"].ToString(), "-"));
             }
             con.Close();
             return results;

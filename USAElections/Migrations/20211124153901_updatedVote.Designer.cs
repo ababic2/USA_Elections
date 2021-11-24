@@ -9,8 +9,8 @@ using USAElections.Data;
 namespace USAElections.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211121001710_updateNow")]
-    partial class updateNow
+    [Migration("20211124153901_updatedVote")]
+    partial class updatedVote
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

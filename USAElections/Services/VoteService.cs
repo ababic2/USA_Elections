@@ -40,7 +40,7 @@ namespace USAElections.Services
             //_context.Vote.Add(_vote);
             //_context.SaveChanges();
             con.Open();
-            string CommandText = "INSERT INTO Vote(number, CandidateId, ConstituencyId) VALUES(" +  vote.number + ", " + vote.CandidateId + ", " + vote.ConstituencyId + ");";
+            string CommandText = "INSERT INTO Vote(number, CandidateId, ConstituencyId) VALUES (" +  vote.number +  ", " + vote.CandidateId + ", " + vote.ConstituencyId + ");";
             cmd = new SqlCommand(CommandText);
             cmd.Connection = con;
             rdr = cmd.ExecuteReader();

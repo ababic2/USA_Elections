@@ -1,0 +1,42 @@
+﻿input[type=file]::file-selector-button {
+    border: 2px solid #f7f7f7;
+    padding: .2em .4em;
+    border-radius: .3em;
+    background-color: #f7f7f7;
+    transition: 1s;
+}
+
+    input[type=file]::file-selector-button:hover {
+        background-color: #d4d2d2;
+    }
+
+.center {
+    margin: auto;
+    width: 60%;
+    padding: 10px;
+}
+
+.accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: 0.4s;
+}
+
+    .active, .accordion:hover {
+        background-color: #ccc;
+    }
+
+/* Style the accordion panel. Note: hidden by default */
+.panel {
+    padding: 0 18px;
+    background-color: white;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}

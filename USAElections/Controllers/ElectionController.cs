@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using USAElections.DAO;
 using USAElections.Data;
@@ -22,6 +23,7 @@ namespace USAElections.Controllers
         public ConstituencyService _constituencyService;
         public VoteService _voteService;
         public CandidateConstituencyService _candidateConstituencyService;
+        public FileService _fileService;
         private readonly INotyfService _notyf;
   
 
@@ -32,12 +34,27 @@ namespace USAElections.Controllers
             _voteService = vs;
             _candidateConstituencyService = ccs;
             _notyf = notyf;
+            _fileService = new FileService();
         }
 
         public IActionResult Index()
         {
+            string errorPath = $"{Directory.GetCurrentDirectory()}{@"\wwwroot\files\errorLog"}" + "\\" + "errors.txt";
             Queries query = new Queries();
-            List<ResultHelper> results = query.GetAllResults();
+            List<Tuple<string, string, string, string>> results = query.GetAllResults();
+            if (System.IO.File.Exists(errorPath))
+            {
+                using (StreamReader sr = System.IO.File.OpenText(errorPath))
+                {
+                    string s = "";
+                    while ((s = sr.ReadLine()) != null)
+                    {
+                        var values = s.Split(',');
+                        results.Add(new Tuple<string, string, string, string>(values[0], values[2], values[1], values[3]));
+                    }
+                }
+            }
+
             ViewModel vm = new ViewModel(query.GetAllCities(), results);
 
             return View(vm);
@@ -46,90 +63,91 @@ namespace USAElections.Controllers
         [HttpPost]
         public IActionResult Index(IFormFile file, [FromServices] IHostingEnvironment hosting)
         {
-            #region Upload CSV
             if (file == null)
             {
                 _notyf.Warning("Please choose file");
             }
             else
             {
-                string fileName = $"{hosting.WebRootPath}\\files\\{file.FileName}";
-                using (FileStream fileStream = System.IO.File.Create(fileName))
-                {
-                    file.CopyTo(fileStream);
-                    fileStream.Flush();
-                }
-                #endregion
-                #region Read CSV
-                var path = $"{Directory.GetCurrentDirectory()}{@"\wwwroot\files"}" + "\\" + file.FileName;
-                string[] lines = System.IO.File.ReadAllLines(path);
+                string[] lines = _fileService.uploadAndReadCSVFile(file, hosting);
+
                 foreach (string line in lines)
                 {
                     var values = line.Split(',');
-
-                    // CHECK IF RECORD IS ALREADY IN BASE AND UPDATE
-                    // ELSE ADD TO BASE
-
-                    // kako se grad ne bi pokazivao 100x na formi
-                    // ispitaj da li se taj grad nalazi i vrati id ako ga pronadjes u bazi
-                    // preskoci ponovno dodavanje
-                    
                     bool candidateInBase = false;
                     bool constituencyInBase = false;
-                    
+
+                    #region Get Constituency ID and/or add to database
                     Constituency constituency = new Constituency(values[0]);
-                    int conId;
-                    conId = _constituencyService.ChechIfCityIsInDatabase(values[0]);
-                    if (conId == -1)
+                    int constituencyId = _constituencyService.ChechIfCityIsInDatabase(values[0]);
+                    if (constituencyId == -1)
                     {
                         // ako nije u bazi, dodaj ga
-                        conId = _constituencyService.AddConstituency(constituency);
+                        constituencyId = _constituencyService.AddConstituency(constituency);
 
                     } else
                     {
                         constituencyInBase = true;
                     }
-                    constituency.ConstituencyId = conId;
+                    constituency.ConstituencyId = constituencyId;
+                    #endregion
 
-                    
+
                     for (int i = 1; i < values.Length; i += 2)
                     {
-                        Candidate can = new Candidate(values[i + 1]);
-                        int canId;
-                        canId = _candidateService.ChechIfCandidateIsInDatabase(values[i + 1]);
-                        if(canId == -1)
+                        if (isNumber(values[i]))
                         {
-                            canId = _candidateService.AddCandidate(can, constituency.ConstituencyId);
-                            candidateInBase = false;
-                        } else
-                        {
-                            candidateInBase = true;
-                        }
-                        can.CandidateId = canId;
+                            #region Get Candidate ID and/or add candidate to database
+                            // if candidate is already in database -> get  Id
+                            // otherwise, add candidate ->  get Id
 
-                        if(candidateInBase && constituencyInBase)
-                        {
-                            _voteService.UpdateVote(Int32.Parse(values[i]), canId, conId);
-                           
-                        } else
-                        {
-                            CandidateConstituency cc = new CandidateConstituency(can, constituency);
-                            _candidateConstituencyService.AddCandidateConstituency(cc);
+                            Candidate candidate = new Candidate(values[i + 1]);
+                            int candidateId = _candidateService.ChechIfCandidateIsInDatabase(values[i + 1]);
+                            if (candidateId == -1)
+                            {
+                                candidateId = _candidateService.AddCandidate(candidate, constituency.ConstituencyId);
+                                candidateInBase = false;
+                            }
+                            else
+                            {
+                                candidateInBase = true;
+                            }
+                            candidate.CandidateId = candidateId;
 
-                            Vote vote = new Vote(Int32.Parse(values[i]), can, constituency);
-                            _voteService.AddVote(vote);
+                            #endregion
+
+                            if (candidateInBase && constituencyInBase)
+                            {
+                                _voteService.UpdateVote(Int32.Parse(values[i]), candidateId, constituencyId);
+
+                            }
+                            else
+                            {
+                                #region Add to Junction and Vote table
+
+                                CandidateConstituency cc = new CandidateConstituency(candidate, constituency);
+                                _candidateConstituencyService.AddCandidateConstituency(cc);
+
+                                Vote vote = new Vote(Int32.Parse(values[i]), candidate, constituency);
+                                _voteService.AddVote(vote);
+                                #endregion
+                            }
+                        } 
+                        else
+                        {
+                            string writeLine = constituency.Name + "," + values[i + 1] + "," + values[i] + "," + "Format Error";
+                            _fileService.createOrFillErrorLogFile(writeLine);
                         }
 
                     }
                 }
             }
-            #endregion
             return Index();
         }
 
-        public IActionResult CheckButtonClicked(string button)
+        private Boolean isNumber(string voteValue)
         {
-            return View();  
+            return Regex.IsMatch(voteValue, @"^ [0-9][0-9]*$");
         }
     }
 }

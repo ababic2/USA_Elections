@@ -3,115 +3,71 @@
 @{
     ViewData["Title"] = "Index";
 }
-<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta.2/css/bootstrap.css" rel="stylesheet" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
 
-
-<div class="center" style="text-align:center">
-    <h2 class="text-primary">Presidential election results</h2>
-</div>
-
-<br />
-<br />
-
-<div class="center">
-    <form asp-controller="election" asp-action="index" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" />
-        <hr />
-
-        <button type="submit" class="btn btn-light">Upload</button>
-    </form>
-</div>
-
-<br />
-<br />
-
-@foreach (var city in Model.cities)
-{
-
-    <button class="accordion">@city</button>
-    <div class="panel">
-        <table class="table table-bordered table-striped" style="width:100%">
-            <thead>
-                <tr>
-                    <th>
-                        Constituency Name
-                    </th>
-                    <th>
-                        Number Of Votes
-                    </th>
-                    <th>
-                        Candidate key
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var obj in Model.results)
-                {
-                    //if obj.ConstituencyName == from Button onda idi dalje
-                    if (obj.ConstituencyName.Equals(city))
-                    {
-                        <tr>
-                            <td width="40%">@obj.ConstituencyName</td>
-                            <td width="20%">@obj.NumberOfVotes</td>
-                            <td width="40%">@obj.CandidateUsername</td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta.2/css/bootstrap.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/election.css" />
+    
+    <div class="center" style="text-align:center">
+        <h2 class="text-primary">Presidential election results</h2>
     </div>
+
     <br />
     <br />
-}
-</div>
 
-<style>
-    input[type=file]::file-selector-button {
-        border: 2px solid #f7f7f7;
-        padding: .2em .4em;
-        border-radius: .3em;
-        background-color: #f7f7f7;
-        transition: 1s;
+    <div class="center">
+        <form asp-controller="election" asp-action="index" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" />
+            <hr />
+
+            <button type="submit" class="btn btn-light">Upload</button>
+        </form>
+    </div>
+
+    <br />
+    <br />
+
+    @foreach (var city in Model.cities)
+    {
+
+        <button class="accordion">@city</button>
+        <div class="panel">
+            <table class="table table-bordered table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>
+                            Constituency Name
+                        </th>
+                        <th>
+                            Number Of Votes
+                        </th>
+                        <th>
+                            Candidate Name
+                        </th>
+                        <th>
+                            Error
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var obj in Model.results)
+                    {
+                        //if obj.ConstituencyName == from Button onda idi dalje
+                        if (obj.Item1.Equals(city))
+                        {
+                    <tr>
+                        <td width="40%">@obj.Item1</td>
+                        <td width="20%">@obj.Item2</td>
+                        <td width="40%">@obj.Item3</td>
+                        <td width="40%">@obj.Item4</td>
+                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <br />
     }
-
-        input[type=file]::file-selector-button:hover {
-            background-color: #d4d2d2;
-        }
-
-    .center {
-        margin: auto;
-        width: 60%;
-        padding: 10px;
-    }
-
-    .accordion {
-        background-color: #eee;
-        color: #444;
-        cursor: pointer;
-        padding: 18px;
-        width: 100%;
-        text-align: left;
-        border: none;
-        outline: none;
-        transition: 0.4s;
-    }
-
-        /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-        .active, .accordion:hover {
-            background-color: #ccc;
-        }
-
-    /* Style the accordion panel. Note: hidden by default */
-    .panel {
-        padding: 0 18px;
-        background-color: white;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.2s ease-out;
-    }
-</style>
 
 <script>
     var acc = document.getElementsByClassName("accordion");
