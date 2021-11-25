@@ -1,2 +1,0 @@
-New York, HC, -17803,Format Error
-New York, JFK, 2069a,Format Error

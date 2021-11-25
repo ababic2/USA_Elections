@@ -43,6 +43,7 @@ namespace USAElections
             services.AddTransient<ConstituencyService>();
             services.AddTransient<VoteService>();
             services.AddTransient<CandidateConstituencyService>();
+            services.AddTransient<DataAccessService>();
 
             services.AddControllersWithViews();
         }

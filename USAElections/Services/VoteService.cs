@@ -27,8 +27,7 @@ namespace USAElections.Services
 
         public void AddVote(Vote vote)
         {
-            //            INSERT INTO table_name(column1, column2, column3, ...)
-            //VALUES(value1, value2, value3, ...);
+            // OVO BACI STRESS IZUZETAK
             //var _vote = new Vote(vote.number, vote.Candidate, vote.Constituency)
             //{
             //    number = vote.number,
@@ -39,8 +38,9 @@ namespace USAElections.Services
             //};
             //_context.Vote.Add(_vote);
             //_context.SaveChanges();
+
             con.Open();
-            string CommandText = "INSERT INTO Vote(number, CandidateId, ConstituencyId) VALUES (" +  vote.number +  ", " + vote.CandidateId + ", " + vote.ConstituencyId + ");";
+            string CommandText = "INSERT INTO Vote(number, CandidateId, ConstituencyId) VALUES (" + vote.number + ", " + vote.CandidateId + ", " + vote.ConstituencyId + ");";
             cmd = new SqlCommand(CommandText);
             cmd.Connection = con;
             rdr = cmd.ExecuteReader();
@@ -51,27 +51,22 @@ namespace USAElections.Services
 
         public int FindVote(int candidateId, int constituencyId)
         {
-            con.Open();
-            string CommandText = "SELECT v.VoteId FROM Vote v WHERE v.CandidateId = " + candidateId + " and v.ConstituencyId = " + constituencyId + ";";
-            cmd = new SqlCommand(CommandText);
-            cmd.Connection = con;
-            rdr = cmd.ExecuteReader();
-
-            List<String> cities = new List<String>();
-            while (rdr.Read())
-            {
-                cities.Add(rdr["VoteId"].ToString());
-            }
-            con.Close();
-            int res;
-            bool success = int.TryParse(cities[0], out res);
-            return res;
+            var query = (from vote in _context.Vote
+                         where vote.ConstituencyId == constituencyId && vote.CandidateId == candidateId
+                         select vote.VoteId).First();
+            return query;
         }
 
 
         public void UpdateVote(int number, int candidateId, int constituencyId)
         {
             int id = FindVote(candidateId, constituencyId);
+
+            // OVO NE RADI
+            //_context.Vote.Where(vote => vote.VoteId == id).First().number = number;
+            //_context.SaveChanges();
+
+
             con.Open();
             string CommandText = "UPDATE Vote SET number = '" + number + "' WHERE VoteId = " + id + ";";
             cmd = new SqlCommand(CommandText);
@@ -79,10 +74,6 @@ namespace USAElections.Services
             rdr = cmd.ExecuteReader();
             _context.SaveChanges();
             con.Close();
-            //_voteService.UpdateVote(Int32.Parse(values[i]), canId, conId);
-            //            UPDATE Customers
-            //SET ContactName = 'Alfred Schmidt', City = 'Frankfurt'
-            //WHERE CustomerID = 1;
         }
     }
 }

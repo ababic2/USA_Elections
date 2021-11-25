@@ -34,5 +34,11 @@ namespace USAElections.Services
             }
             return -1;
         }
+        public List<String> GetAllCities()
+        {
+            var result = _context.Constituency.Select(c => c.Name).Distinct().ToList();
+            return result;
+        }
+
     }
 }

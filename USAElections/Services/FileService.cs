@@ -48,5 +48,23 @@ namespace USAElections.Services
             return System.IO.File.ReadAllLines(path);
             #endregion
         }
+
+        public List<Tuple<string, string, string, string>> readErrorFile(string errorPath)
+        {
+            List<Tuple<string, string, string, string>> results = new List<Tuple<string, string, string, string>>();
+            if (System.IO.File.Exists(errorPath))
+            {
+                using (StreamReader sr = System.IO.File.OpenText(errorPath))
+                {
+                    string s = "";
+                    while ((s = sr.ReadLine()) != null)
+                    {
+                        var values = s.Split(',');
+                        results.Add(new Tuple<string, string, string, string>(values[0], values[2], values[1], values[3]));
+                    }
+                }
+            }
+            return results;
+        }
     }
 }

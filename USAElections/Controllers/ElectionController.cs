@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using USAElections.DAO;
 using USAElections.Data;
 using USAElections.Models;
 using USAElections.Services;
@@ -24,15 +23,17 @@ namespace USAElections.Controllers
         public VoteService _voteService;
         public CandidateConstituencyService _candidateConstituencyService;
         public FileService _fileService;
+        public DataAccessService _dataAccessService;
         private readonly INotyfService _notyf;
   
 
-        public ElectionController(CandidateService cs, ConstituencyService cos, VoteService vs, CandidateConstituencyService ccs, INotyfService notyf)
+        public ElectionController(CandidateService cs, ConstituencyService cos, VoteService vs, CandidateConstituencyService ccs, DataAccessService dataAccessService, INotyfService notyf)
         {
             _candidateService = cs;
             _constituencyService = cos;
             _voteService = vs;
             _candidateConstituencyService = ccs;
+            _dataAccessService = dataAccessService;
             _notyf = notyf;
             _fileService = new FileService();
         }
@@ -40,22 +41,12 @@ namespace USAElections.Controllers
         public IActionResult Index()
         {
             string errorPath = $"{Directory.GetCurrentDirectory()}{@"\wwwroot\files\errorLog"}" + "\\" + "errors.txt";
-            Queries query = new Queries();
-            List<Tuple<string, string, string, string>> results = query.GetAllResults();
-            if (System.IO.File.Exists(errorPath))
-            {
-                using (StreamReader sr = System.IO.File.OpenText(errorPath))
-                {
-                    string s = "";
-                    while ((s = sr.ReadLine()) != null)
-                    {
-                        var values = s.Split(',');
-                        results.Add(new Tuple<string, string, string, string>(values[0], values[2], values[1], values[3]));
-                    }
-                }
-            }
+            List<Tuple<string, string, string, string>> results = _dataAccessService.GetAllResults();
+            
+            // add results from error file and show on view
+            results.AddRange(_fileService.readErrorFile(errorPath));
 
-            ViewModel vm = new ViewModel(query.GetAllCities(), results);
+            ViewModel vm = new ViewModel(_constituencyService.GetAllCities(), results);
 
             return View(vm);
         }
@@ -80,15 +71,13 @@ namespace USAElections.Controllers
                     #region Get Constituency ID and/or add to database
                     Constituency constituency = new Constituency(values[0]);
                     int constituencyId = _constituencyService.ChechIfCityIsInDatabase(values[0]);
-                    if (constituencyId == -1)
-                    {
-                        // ako nije u bazi, dodaj ga
+                    
+                    // ako nije u bazi, dodaj ga
+                    if (constituencyId == -1)    
                         constituencyId = _constituencyService.AddConstituency(constituency);
-
-                    } else
-                    {
+                    else
                         constituencyInBase = true;
-                    }
+
                     constituency.ConstituencyId = constituencyId;
                     #endregion
 
@@ -109,18 +98,13 @@ namespace USAElections.Controllers
                                 candidateInBase = false;
                             }
                             else
-                            {
                                 candidateInBase = true;
-                            }
                             candidate.CandidateId = candidateId;
 
                             #endregion
 
                             if (candidateInBase && constituencyInBase)
-                            {
                                 _voteService.UpdateVote(Int32.Parse(values[i]), candidateId, constituencyId);
-
-                            }
                             else
                             {
                                 #region Add to Junction and Vote table
