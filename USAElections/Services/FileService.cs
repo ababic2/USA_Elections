@@ -25,9 +25,14 @@ namespace USAElections.Services
             }
             else
             {
-                using (StreamWriter sw = System.IO.File.AppendText(errorPath))
+                // if there is already record in error log, don't write it again
+                var linesInFile = System.IO.File.ReadAllLines(errorPath).Where(l => l.Equals(line)).FirstOrDefault();
+                if (linesInFile == null)
                 {
-                    sw.WriteLine(line);
+                    using (StreamWriter sw = System.IO.File.AppendText(errorPath))
+                    {
+                        sw.WriteLine(line);
+                    }
                 }
             }
         }

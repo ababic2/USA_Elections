@@ -53,14 +53,13 @@ namespace USAElections.Services
         {
             var query = (from vote in _context.Vote
                          where vote.ConstituencyId == constituencyId && vote.CandidateId == candidateId
-                         select vote.VoteId).First();
+                         select vote.VoteId).FirstOrDefault();
             return query;
         }
 
 
-        public void UpdateVote(int number, int candidateId, int constituencyId)
-        {
-            int id = FindVote(candidateId, constituencyId);
+        public void UpdateVote(int number, int candidateId, int constituencyId, int id)
+        {         
 
             // OVO NE RADI
             //_context.Vote.Where(vote => vote.VoteId == id).First().number = number;

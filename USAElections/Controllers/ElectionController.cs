@@ -80,8 +80,7 @@ namespace USAElections.Controllers
 
                     constituency.ConstituencyId = constituencyId;
                     #endregion
-
-
+                    
                     for (int i = 1; i < values.Length; i += 2)
                     {
                         if (isNumber(values[i]))
@@ -103,8 +102,11 @@ namespace USAElections.Controllers
 
                             #endregion
 
-                            if (candidateInBase && constituencyInBase)
-                                _voteService.UpdateVote(Int32.Parse(values[i]), candidateId, constituencyId);
+                            int voteInDatabase = _voteService.FindVote(candidateId, constituencyId);
+                            if (candidateInBase && constituencyInBase && voteInDatabase != 0)
+                            {
+                                _voteService.UpdateVote(Int32.Parse(values[i]), candidateId, constituencyId, voteInDatabase);                             
+                            }
                             else
                             {
                                 #region Add to Junction and Vote table
@@ -116,6 +118,8 @@ namespace USAElections.Controllers
                                 _voteService.AddVote(vote);
                                 #endregion
                             }
+                            string deleteLine = constituency.Name + "," + values[i + 1];
+                            checkIfRecordExistsInErrorLog(deleteLine, file, hosting);
                         } 
                         else
                         {
@@ -127,6 +131,18 @@ namespace USAElections.Controllers
                 }
             }
             return Index();
+        }
+
+        private void checkIfRecordExistsInErrorLog(string deleteLine, IFormFile file, IHostingEnvironment hosting)
+        {
+                string path = $"{Directory.GetCurrentDirectory()}{@"\wwwroot\files\errorLog"}" + "\\" + "errors.txt";
+
+            if (System.IO.File.Exists(path))
+            {
+                List<String> lst = System.IO.File.ReadAllLines(path).Where(line => !line.Contains(deleteLine)).ToList();
+                System.IO.File.WriteAllLines(path, lst);
+            }
+            
         }
 
         private Boolean isNumber(string voteValue)
