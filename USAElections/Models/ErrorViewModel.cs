@@ -1,5 +1,3 @@
-using System;
-
 namespace USAElections.Models
 {
     public class ErrorViewModel

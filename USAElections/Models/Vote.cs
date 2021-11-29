@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace USAElections.Models
 {
@@ -12,7 +7,7 @@ namespace USAElections.Models
         [Key]
         public int VoteId { get; set; }
 
-        public int number { get; set; }
+        public int Number { get; set; }
 
         //Navigation properties
         public int CandidateId { get; set; }
@@ -26,7 +21,7 @@ namespace USAElections.Models
         }
         public Vote(int number, Candidate candidate, Constituency constituency)
         {
-            this.number = number;
+            this.Number = number;
             this.CandidateId = candidate.CandidateId;
             this.ConstituencyId = constituency.ConstituencyId;
             this.Candidate = candidate;

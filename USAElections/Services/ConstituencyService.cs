@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using USAElections.Data;
 using USAElections.Models;
 
@@ -27,8 +26,8 @@ namespace USAElections.Services
             var result = from c in _context.Constituency
                          where c.Name == name
                          select c.ConstituencyId;
-          
-            if(result.Any())
+
+            if (result.Any())
             {
                 return result.First();
             }
@@ -40,5 +39,16 @@ namespace USAElections.Services
             return result;
         }
 
+        public void SetOrAddConstituency(ref Constituency constituency, ref bool constituencyInBase)
+        {
+            int constituencyId = ChechIfCityIsInDatabase(constituency.Name);
+
+            if (constituencyId == -1)
+                constituencyId = AddConstituency(constituency);
+            else
+                constituencyInBase = true;
+
+            constituency.ConstituencyId = constituencyId;
+        }
     }
 }

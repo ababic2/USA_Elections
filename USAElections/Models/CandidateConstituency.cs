@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace USAElections.Models
+﻿namespace USAElections.Models
 {
     public class CandidateConstituency
     {

@@ -1,16 +1,10 @@
 using AspNetCoreHero.ToastNotification;
-using AspNetCoreHero.ToastNotification.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using USAElections.Data;
 using USAElections.Services;
 
@@ -33,7 +27,7 @@ namespace USAElections
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
-  
+
 
             // add toast notification
             services.AddNotyf(config => { config.DurationInSeconds = 10; config.IsDismissable = true; config.Position = NotyfPosition.BottomRight; });
@@ -51,8 +45,6 @@ namespace USAElections
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // kada se desi request, sta ce se sve desiti u pipleine
-            // u ovom slucaju MVC, rutitanje, definisanje pocetnog endpointa
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -64,14 +56,12 @@ namespace USAElections
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
-            app.UseStaticFiles(); // tj. css i ostalo iz wwwroot
+            app.UseStaticFiles(); //wwwroot
 
-            //kada se desi rutiranje, odredjuje se koji je endpoint
             app.UseRouting();
 
             app.UseAuthorization();
 
-            // kada udari na endpoint u routing, izvrsi se ovo, tj use endpoint
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

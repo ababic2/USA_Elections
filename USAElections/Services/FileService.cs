@@ -4,14 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace USAElections.Services
 {
     public class FileService
     {
 
-        public void createOrFillErrorLogFile(string line)
+        public void CreateOrFillErrorLogFile(string line)
         {
             string errorPath = $"{Directory.GetCurrentDirectory()}{@"\wwwroot\files\errorLog"}" + "\\" + "errors.txt";
 
@@ -37,7 +36,7 @@ namespace USAElections.Services
             }
         }
 
-        public string[] uploadAndReadCSVFile(IFormFile file, IHostingEnvironment hosting)
+        public string[] UploadAndReadCSVFile(IFormFile file, IHostingEnvironment hosting)
         {
             #region Upload CSV
             string fileName = $"{hosting.WebRootPath}\\files\\{file.FileName}";
@@ -54,9 +53,9 @@ namespace USAElections.Services
             #endregion
         }
 
-        public List<Tuple<string, string, string, string, string>> readErrorFile(string errorPath, Dictionary<string, string> legend)
+        public List<Tuple<string, string, string, string, string>> ReadErrorFile(string errorPath, Dictionary<string, string> legend)
         {
-            List<Tuple<string, string, string, string, string>> results = new List<Tuple<string, string, string, string,string>>();
+            List<Tuple<string, string, string, string, string>> results = new List<Tuple<string, string, string, string, string>>();
             if (System.IO.File.Exists(errorPath))
             {
                 using (StreamReader sr = System.IO.File.OpenText(errorPath))

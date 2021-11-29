@@ -18,7 +18,7 @@ namespace USAElections.Controllers
 {
     public class ElectionController : Controller
     {
-        private Dictionary<string, string> legend { get; set; }
+        public Dictionary<string, string> legend { get; set; }
         public CandidateService _candidateService;
         public ConstituencyService _constituencyService;
         public VoteService _voteService;
@@ -46,9 +46,9 @@ namespace USAElections.Controllers
             List<Tuple<string, string, string, string, string>> results = _dataAccessService.GetAllResults();
             
             // add results from error file and show on view
-            results.AddRange(_fileService.readErrorFile(errorPath, legend));
+            results.AddRange(_fileService.ReadErrorFile(errorPath, legend));
 
-            ViewModel vm = new ViewModel(_constituencyService.GetAllCities(), results);
+            ViewModel vm = new ViewModel(_constituencyService.GetAllCities(), results, legend);
 
             return View(vm);
         }
@@ -62,7 +62,7 @@ namespace USAElections.Controllers
             }
             else
             {
-                string[] lines = _fileService.uploadAndReadCSVFile(file, hosting);
+                string[] lines = _fileService.UploadAndReadCSVFile(file, hosting);
 
                 foreach (string line in lines)
                 {
@@ -71,16 +71,10 @@ namespace USAElections.Controllers
                     bool constituencyInBase = false;
 
                     #region Get Constituency ID and/or add to database
-                    Constituency constituency = new Constituency(values[0]);
-                    int constituencyId = _constituencyService.ChechIfCityIsInDatabase(values[0]);
-                    
-                    // ako nije u bazi, dodaj ga
-                    if (constituencyId == -1)    
-                        constituencyId = _constituencyService.AddConstituency(constituency);
-                    else
-                        constituencyInBase = true;
 
-                    constituency.ConstituencyId = constituencyId;
+                    Constituency constituency = new Constituency(values[0]);
+                    _constituencyService.SetOrAddConstituency(ref constituency, ref constituencyInBase);
+                   
                     #endregion
                     
                     for (int i = 1; i < values.Length; i += 2)
@@ -88,26 +82,16 @@ namespace USAElections.Controllers
                         if (isNumber(values[i]))
                         {
                             #region Get Candidate ID and/or add candidate to database
-                            // if candidate is already in database -> get  Id
-                            // otherwise, add candidate ->  get Id
-
+          
                             Candidate candidate = new Candidate(values[i + 1], legend[values[i + 1]]);
-                            int candidateId = _candidateService.ChechIfCandidateIsInDatabase(values[i + 1]);
-                            if (candidateId == -1)
-                            {
-                                candidateId = _candidateService.AddCandidate(candidate, constituency.ConstituencyId);
-                                candidateInBase = false;
-                            }
-                            else
-                                candidateInBase = true;
-                            candidate.CandidateId = candidateId;
+                            _candidateService.SetOrAddCandidate(ref candidate, ref candidateInBase);
 
                             #endregion
 
-                            int voteInDatabase = _voteService.FindVote(candidateId, constituencyId);
+                            int voteInDatabase = _voteService.FindVote(candidate.CandidateId, constituency.ConstituencyId);
                             if (candidateInBase && constituencyInBase && voteInDatabase != 0)
                             {
-                                _voteService.UpdateVote(Int32.Parse(values[i]), candidateId, constituencyId, voteInDatabase);                             
+                                _voteService.UpdateVote(Int32.Parse(values[i]), voteInDatabase);                             
                             }
                             else
                             {
@@ -126,7 +110,7 @@ namespace USAElections.Controllers
                         else
                         {
                             string writeLine = constituency.Name + "," + values[i + 1] + "," + values[i] + "," + "Format Error";
-                            _fileService.createOrFillErrorLogFile(writeLine);
+                            _fileService.CreateOrFillErrorLogFile(writeLine);
                         }
 
                     }

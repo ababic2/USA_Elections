@@ -26,7 +26,7 @@
     <br />
     <br />
 
-    @foreach (var city in Model.cities)
+    @foreach (var city in Model.Cities)
     {
 
         <button class="accordion">@city</button>
@@ -41,7 +41,7 @@
                             Number Of Votes
                         </th>
                         <th>
-                            Candidate Username
+                            Percentage
                         </th>
                         <th>
                             Error
@@ -49,17 +49,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var obj in Model.results)
+                    @foreach (var obj in Model.ViewContainer)
                     {
                         //if obj.ConstituencyName == from Button onda idi dalje
                         if (obj.Item1.Equals(city))
                         {
-                    <tr>
-                        <td width="40%">@obj.Item4</td>
-                        <td width="20%">@obj.Item2</td>
-                        <td width="40%">@obj.Item3</td>
-                        <td width="40%">@obj.Item5</td>
-                    </tr>
+                            <tr>
+                                <td width="40%">@obj.Item2</td>
+                                <td width="20%">@obj.Item3</td>
+                                <td width="40%">@obj.Item4</td>
+                                <td width="40%">@obj.Item5</td>
+                            </tr>
                         }
                     }
                 </tbody>
