@@ -37,5 +37,13 @@ namespace USAElections.Services
 
         }
 
+        public int SumOfVotesForCandidates(string username)
+        {
+            var totalSums =
+                from candidate in _context.Candidate
+                from votes in _context.Vote
+                where candidate.CandidateId == votes.CandidateId && candidate.Username == username
+                select votes.number;
+        }
     }
 }

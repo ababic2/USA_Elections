@@ -19,9 +19,10 @@ namespace USAElections.Models
         public List<CandidateConstituency> CandidateConstituency { get; set; } //many to many
         public List<Vote> Vote { get; set; } // one to many
 
-        public Candidate(String Username)
+        public Candidate(String Username, String FullName)
         {
             this.Username = Username;
+            this.FullName = FullName;
         }
         
     }

@@ -54,9 +54,9 @@ namespace USAElections.Services
             #endregion
         }
 
-        public List<Tuple<string, string, string, string>> readErrorFile(string errorPath)
+        public List<Tuple<string, string, string, string, string>> readErrorFile(string errorPath, Dictionary<string, string> legend)
         {
-            List<Tuple<string, string, string, string>> results = new List<Tuple<string, string, string, string>>();
+            List<Tuple<string, string, string, string, string>> results = new List<Tuple<string, string, string, string,string>>();
             if (System.IO.File.Exists(errorPath))
             {
                 using (StreamReader sr = System.IO.File.OpenText(errorPath))
@@ -65,7 +65,8 @@ namespace USAElections.Services
                     while ((s = sr.ReadLine()) != null)
                     {
                         var values = s.Split(',');
-                        results.Add(new Tuple<string, string, string, string>(values[0], values[2], values[1], values[3]));
+                        // constituency name, Vote, username, full name, error message
+                        results.Add(new Tuple<string, string, string, string, string>(values[0], values[2], values[1], legend[values[1]], values[3]));
                     }
                 }
             }

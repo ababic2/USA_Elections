@@ -18,6 +18,7 @@ namespace USAElections.Controllers
 {
     public class ElectionController : Controller
     {
+        private Dictionary<string, string> legend { get; set; }
         public CandidateService _candidateService;
         public ConstituencyService _constituencyService;
         public VoteService _voteService;
@@ -29,6 +30,7 @@ namespace USAElections.Controllers
 
         public ElectionController(CandidateService cs, ConstituencyService cos, VoteService vs, CandidateConstituencyService ccs, DataAccessService dataAccessService, INotyfService notyf)
         {
+            setCandidateLegend();
             _candidateService = cs;
             _constituencyService = cos;
             _voteService = vs;
@@ -41,10 +43,10 @@ namespace USAElections.Controllers
         public IActionResult Index()
         {
             string errorPath = $"{Directory.GetCurrentDirectory()}{@"\wwwroot\files\errorLog"}" + "\\" + "errors.txt";
-            List<Tuple<string, string, string, string>> results = _dataAccessService.GetAllResults();
+            List<Tuple<string, string, string, string, string>> results = _dataAccessService.GetAllResults();
             
             // add results from error file and show on view
-            results.AddRange(_fileService.readErrorFile(errorPath));
+            results.AddRange(_fileService.readErrorFile(errorPath, legend));
 
             ViewModel vm = new ViewModel(_constituencyService.GetAllCities(), results);
 
@@ -89,7 +91,7 @@ namespace USAElections.Controllers
                             // if candidate is already in database -> get  Id
                             // otherwise, add candidate ->  get Id
 
-                            Candidate candidate = new Candidate(values[i + 1]);
+                            Candidate candidate = new Candidate(values[i + 1], legend[values[i + 1]]);
                             int candidateId = _candidateService.ChechIfCandidateIsInDatabase(values[i + 1]);
                             if (candidateId == -1)
                             {
@@ -148,6 +150,16 @@ namespace USAElections.Controllers
         private Boolean isNumber(string voteValue)
         {
             return Regex.IsMatch(voteValue, @"^ [0-9][0-9]*$");
+        }
+
+        private void setCandidateLegend()
+        {
+            this.legend = new Dictionary<string, string>();
+            legend.Add(" DT", "Donald Trump");
+            legend.Add(" HC", "Hilary Clinton");
+            legend.Add(" JB", "Joe Biden");
+            legend.Add(" JFK", "John F.Kennedy");
+            legend.Add(" JR", "Jack Randall");
         }
     }
 }
