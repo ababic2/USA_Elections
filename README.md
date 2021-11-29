@@ -2,7 +2,7 @@
 
 ## Demo
 
-https://drive.google.com/file/d/157bYBqXzowj389MGM1-Q9IWqEoEhv0Jt/view
+https://drive.google.com/file/d/157bYBqXzowj389MGM1-Q9IWqEoEhv0Jt/view?usp=sharing
 
 ## Implementacija
  - ASP.NET Core MVC
@@ -10,6 +10,7 @@ https://drive.google.com/file/d/157bYBqXzowj389MGM1-Q9IWqEoEhv0Jt/view
 ### Database 
 
 - ERD
+
 U budućnosti bi se mogle javiti potrebe za unos novih informacija, npr. info o kandidatu, broj stanovnika grada itd.
 Stoga, baza se sastoji od tabela Candidate, Constitency, Vote jer je na ovaj način lakše u budućnosti upisivati nove record-e u bazu.
 
