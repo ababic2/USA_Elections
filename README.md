@@ -1,22 +1,46 @@
-# USA_Elections
+# USA Elections  
 
-## Demo
+A web application for managing and visualizing data related to U.S. elections. This is part of firm task.
+Built with **ASP.NET Core MVC** and a clean separation of concerns using services for database and file operations.  
 
-https://drive.google.com/file/d/157bYBqXzowj389MGM1-Q9IWqEoEhv0Jt/view?usp=sharing
+## Demo  
 
-## Implementacija
- - ASP.NET Core MVC
- - Rad sa bazom i files je odvojen u Services
-
-### Database 
-
-- ERD
-
-U budućnosti bi se mogle javiti potrebe za unos novih informacija, npr. info o kandidatu, broj stanovnika grada itd.
-Stoga, baza se sastoji od tabela Candidate, Constitency, Vote jer je na ovaj način lakše u budućnosti upisivati nove record-e u bazu.
-Više o ERD:
-https://drive.google.com/file/d/15bHqeY7DvINK0Nr9jJ_lp4cPHZqxkLuC/view?usp=sharing
+🎥 [Watch the demo here](https://drive.google.com/file/d/157bYBqXzowj389MGM1-Q9IWqEoEhv0Jt/view?usp=sharing)  
 
 
-### Validacija
-Netačni unosi se nalaze u posebnom error file-u kako bi se izbjeglo unošenje netačnih record-a u bazu.
+## Tech Stack  
+
+- **ASP.NET Core MVC** – Web framework for the application  
+- **Services Layer** – Handles all database and file interactions, ensuring a clean architecture  
+
+## Database Design  
+
+The database currently consists of the following tables:  
+
+- **Candidate** – Stores information about each election candidate  
+- **Constituency** – Contains data about constituencies  
+- **Vote** – Keeps track of votes  
+
+This modular design makes it easy to add new records or expand the schema as needed.  
+
+📄 [View the ERD](https://drive.google.com/file/d/15bHqeY7DvINK0Nr9jJ_lp4cPHZqxkLuC/view?usp=sharing)  
+
+## Validation  
+
+Incorrect entries are automatically separated into a dedicated error file.  
+This ensures that invalid records do not get inserted into the database and makes error handling more transparent.  
+
+## Features  
+
+- CRUD operations for election data  
+- Clean architecture with services  
+- Validation of input data with error logging  
+- Scalable database design  
+
+## Future Improvements  
+
+- Adding richer candidate details (e.g. biography, political history)  
+- Incorporating additional geographic data (population, demographics)  
+- More advanced reporting and visualization tools  
+
+---
